@@ -15,11 +15,14 @@ const MAX_AREAS = 8;
 const MAX_EDGES = 12;
 const MAX_FILES_SCANNED = 150;
 const EVIDENCE_LINES = 30;
+const MANIFEST_LINES = 60;
 
 export type DemoRead = { path: string; startLine?: number; endLine?: number };
 
 export type DemoExploration = {
   graph: ArchitectureGraph;
+  /** The build file a person would open first, when the repository has one. */
+  manifest?: DemoRead;
   /** The reads that justify the evidence in the graph, in the order a person would do them. */
   reads: DemoRead[];
   /** A word worth searching for, taken from the first component. */
@@ -96,7 +99,6 @@ function importsFrom(line: string, segment: string): boolean {
 export function buildDemoExploration(snapshot: Snapshot): DemoExploration {
   const reads: DemoRead[] = [];
   const manifest = MANIFESTS.find((name) => isReadable(snapshot.file(name) ?? { path: name, size: 0, text: null, omitted: "binary" }));
-  if (manifest) reads.push({ path: manifest, startLine: 1, endLine: 60 });
 
   let areas = findAreas(snapshot);
   if (areas.length === 0) {
@@ -146,5 +148,9 @@ export function buildDemoExploration(snapshot: Snapshot): DemoExploration {
     }
   }
 
-  return { graph: { nodes, edges }, reads, searchTerm: areas[0].dir === "" ? undefined : segmentOf(areas[0].dir) };
+  return {
+    graph: { nodes, edges },
+    manifest: manifest ? { path: manifest, startLine: 1, endLine: MANIFEST_LINES } : undefined,
+    reads, searchTerm: areas[0].dir === "" ? undefined : segmentOf(areas[0].dir),
+  };
 }

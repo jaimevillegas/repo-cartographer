@@ -43,8 +43,9 @@ describe("buildDemoExploration", () => {
     expect(apiToDb.evidence).toEqual([{ path: "src/api/server.ts", startLine: 1, endLine: 1 }]);
   });
 
-  it("lists reads that cover all the evidence, manifest first", () => {
-    expect(exploration.reads[0]).toEqual({ path: "package.json", startLine: 1, endLine: 60 });
+  it("names the build file to open first, apart from the reads that cover the evidence", () => {
+    expect(exploration.manifest).toEqual({ path: "package.json", startLine: 1, endLine: 60 });
+    expect(exploration.reads.map((read) => read.path)).not.toContain("package.json");
     const read = (path: string, line: number) =>
       exploration.reads.some((r) => r.path === path && (r.startLine ?? 1) <= line && line <= (r.endLine ?? Infinity));
     for (const item of [...exploration.graph.nodes, ...exploration.graph.edges]) {
