@@ -145,6 +145,7 @@ export const TraceEventSchema = z.discriminatedUnion("type", [
 export type TraceEvent = z.infer<typeof TraceEventSchema>;
 export type TraceEventType = TraceEvent["type"];
 export type RunPhase = (typeof RUN_PHASES)[number];
+export type LimitKind = (typeof LIMIT_KINDS)[number];
 export type RunFailureCode = (typeof RUN_FAILURE_CODES)[number];
 
 /** The last event of a run: after it, the stream ends. */
