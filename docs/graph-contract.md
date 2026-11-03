@@ -41,13 +41,21 @@ Paths are POSIX, relative to the repository root, with no `.`, `..` or empty seg
 
 1. **Schema** (`src/core/schema/graph.ts`): shape, enums, limits, strict keys. Fails with Zod errors.
 2. **Integrity** (`src/core/validator/integrity.ts`): unique ids, edges and parents that point at existing nodes, no self-loops, no duplicate edges, no parent cycles.
-3. **Snapshot** (planned): every cited file exists at the pinned commit and every range is inside the file.
+3. **Snapshot** (`src/core/validator/evidence.ts`): every cited file exists at the pinned commit, is a readable text file, and every range is inside it. When the file name is wrong, the issue suggests files with the same name elsewhere in the repo.
 
-Layers 2 and 3 produce `ValidationIssue` objects. The `submit_graph` tool returns them to the model as its result, which is the repair loop, and they are recorded in the trace.
+`validateGraph` runs the schema first, then layers 2 and 3 together so one round of feedback lists everything that is wrong. Layers 2 and 3 produce `ValidationIssue` objects. The `submit_graph` tool returns them to the model as its result, which is the repair loop, and they are recorded in the trace.
 
 ## Tools
 
 The agent has four tools: `list_tree`, `read_file`, `search_code` and the terminal `submit_graph`. Every call has a required `reason`, which the trace shows. No tool takes a repository argument, because the run is pinned to one snapshot. `search_code` takes a literal query, not a regular expression.
+
+| Tool | Behaviour |
+| --- | --- |
+| `list_tree` | Lists a directory, 2 levels deep by default (up to 6), directories first, at most 300 entries. |
+| `read_file` | Returns numbered lines, at most 400 per call, long lines cut at 500 characters. Says where to continue when the file is longer. |
+| `search_code` | Literal substring search, case-insensitive by default, 20 results by default (up to 50), optionally limited to a path. |
+
+A tool call that fails (bad arguments, missing path, binary or oversized file) returns an error the model can read. It never throws.
 
 ## Trace events
 

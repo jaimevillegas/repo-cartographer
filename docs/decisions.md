@@ -12,7 +12,8 @@ Living record of the decisions taken before and during the build. Update it when
 
 - Resolve the default branch to a commit SHA at the start of a run and pin every read to it.
 - Download the repo tarball at that SHA once and run `list_tree`, `read_file` and `search_code` locally on the snapshot. This avoids GitHub's search and per-file rate limits and lets the validator check evidence without network access.
-- Treat the tarball as untrusted: sanitize paths, ignore symlinks, submodules and LFS, cap the total size.
+- Resolve the commit with one REST call (`commits/HEAD`, which returns just the SHA) and download the tarball from `codeload.github.com`. Codeload does not count against the REST rate limit and needs no token for public repos; the server-side token is only ever sent to `api.github.com`.
+- Treat the tarball as untrusted. It is parsed by a small streaming tar reader in this repo and nothing is written to disk. Paths are validated (no `..`, no absolute or backslash paths, no control characters), links and directories are ignored, `node_modules` is skipped, and entries outside the archive's single top-level directory are dropped. Limits, all configurable: 100 MB compressed, 150 MB unpacked, 50,000 files, 1 MB per text file. A file over the per-file limit, or a binary one, stays in the tree but its content is not kept. Going over a limit fails the run with `repo_too_large`.
 - Build GitHub URLs only from a parsed `owner/repo`, never from the raw user URL.
 
 ## Agent
