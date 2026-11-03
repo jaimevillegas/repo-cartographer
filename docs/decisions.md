@@ -6,7 +6,7 @@ Living record of the decisions taken before and during the build. Update it when
 
 - Input: URL of a public GitHub repository. Output: an architecture graph validated by schema, with file and line evidence on every node and edge, plus the full agent trace.
 - Out of scope for the MVP: private repos, accounts, sequence diagrams, AST analysis, several repos at once, manual diagram editing.
-- Component granularity needs an explicit rule (deployable units or top-level modules, roughly 5 to 15 nodes) so recall and precision mean something. To be written into the graph contract.
+- Component granularity follows an explicit rule (deployable units or top-level modules, about 5 to 15 nodes) so recall and precision mean something. See [graph-contract.md](graph-contract.md).
 
 ## Data access
 
@@ -25,11 +25,15 @@ Pipeline: validate URL and resolve SHA, fetch snapshot, deterministic recon of m
 - Keep the message history append-only. Editing earlier turns can invalidate stored reasoning on newer accounts; use the provider's own compaction when context needs trimming.
 - Handle model refusals explicitly and show a clear message in the UI.
 
-## Graph contract (to be specified)
+## Graph contract
 
-- Node types: frontend, service, database, library or module, queue, infrastructure, external. Optional `parent` for monorepo grouping.
-- Edge relations: calls, reads from, depends on, deploys, publishes or consumes. Edges can be marked `explicit` or `inferred`.
-- Evidence: file path and line range. A node or edge without valid evidence fails validation.
+Specified in [graph-contract.md](graph-contract.md) and implemented in `src/core/schema/`.
+
+- Node types: frontend, service, database, module, queue, infrastructure, external. Optional `parent` for monorepo grouping.
+- Edge relations: calls, reads from, depends on, deploys, publishes to, consumes from. Edges are marked `explicit` or `inferred`.
+- Evidence: file path and line range of at most 200 lines. A node or edge without valid evidence fails validation.
+- Validation is layered: schema, then graph integrity, then a check against the snapshot.
+- The tools take no repository argument, so a run cannot be redirected to another repository or commit. `search_code` takes a literal query, not a regular expression, to rule out catastrophic backtracking on untrusted content.
 
 ## Models and providers
 
