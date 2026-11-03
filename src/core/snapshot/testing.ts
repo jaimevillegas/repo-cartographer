@@ -30,13 +30,13 @@ function headerBlock(name: string, size: number, flag: string, linkname = ""): B
   const block = Buffer.alloc(512);
   writeField(block, 0, 100, name);
   writeField(block, 100, 8, "0000644\0");
-  writeField(block, 108, 16, "0000000\00000000000\0");
+  writeField(block, 108, 16, "0000000\x0000000000\x00");
   writeField(block, 124, 12, `${size.toString(8).padStart(11, "0")}\0`);
   writeField(block, 136, 12, "00000000000\0");
   block.fill(0x20, 148, 156);
   writeField(block, 156, 1, flag);
   writeField(block, 157, 100, linkname);
-  writeField(block, 257, 8, "ustar\000");
+  writeField(block, 257, 8, "ustar\x0000");
   let sum = 0;
   for (const byte of block) sum += byte;
   writeField(block, 148, 8, `${sum.toString(8).padStart(6, "0")}\0 `);
