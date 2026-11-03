@@ -25,6 +25,7 @@ Pipeline: validate URL and resolve SHA, fetch snapshot, deterministic recon of m
 - Every tool call carries a required `reason` field. The trace shows reason, action and a summary of the observation, not raw model reasoning, which varies by provider.
 - Keep the message history append-only. Editing earlier turns can invalidate stored reasoning on newer accounts; use the provider's own compaction when context needs trimming.
 - Handle model refusals explicitly and show a clear message in the UI.
+- When a limit is reached, ask the model to submit the best graph it can support and return it marked partial, instead of failing the run. Details and defaults are in [agent.md](agent.md).
 
 ## Graph contract
 
