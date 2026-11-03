@@ -71,6 +71,14 @@ describe("buildDemoExploration", () => {
     expect(() => buildDemoExploration(builder.build(testRef))).toThrow("no readable files");
   });
 
+  it("cites an implementation file rather than a test when it has the choice", () => {
+    const withTests = snapshotFromTexts({
+      "lib/a.test.ts": "test();\n",
+      "lib/helper.ts": "export {};\n",
+    });
+    expect(buildDemoExploration(withTests).graph.nodes[0].evidence[0].path).toBe("lib/helper.ts");
+  });
+
   it("limits the number of components", () => {
     const many = snapshotFromTexts(Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`pkg${i}/index.ts`, "export {};\n"])));
     expect(buildDemoExploration(many).graph.nodes).toHaveLength(8);

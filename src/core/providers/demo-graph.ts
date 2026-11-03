@@ -74,7 +74,11 @@ function uniqueId(dir: string, taken: Set<string>): string {
 
 function bestFile(files: Array<SnapshotFile & { text: string }>): SnapshotFile & { text: string } {
   const depth = (file: SnapshotFile) => file.path.split("/").length;
-  const rank = (file: SnapshotFile) => (ENTRY_NAME.test(segmentOf(file.path)) ? 0 : 1);
+  const rank = (file: SnapshotFile) => {
+    const name = segmentOf(file.path);
+    if (/\.(test|spec)\./.test(name)) return 2;
+    return ENTRY_NAME.test(name) ? 0 : 1;
+  };
   return [...files].sort((a, b) => rank(a) - rank(b) || depth(a) - depth(b) || (a.path < b.path ? -1 : 1))[0];
 }
 
